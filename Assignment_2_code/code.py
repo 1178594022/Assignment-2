@@ -1,20 +1,25 @@
 import urllib.request
-import random
-import string
-import itertools 
-import rlcompleter
 import re
-import operator
 
-url = 'https://www.gutenberg.org/cache/epub/66627/pg66627.txt'
-response = urllib.request.urlopen(url)
-data = response.read()
-text = data.decode('utf-8')
-nltk_text = data.decode('utf-8')
+url1 = 'https://www.gutenberg.org/cache/epub/66627/pg66627.txt'
+response = urllib.request.urlopen(url1)
+data1 = response.read()
+text1 = data1.decode('utf-8')
+nltk_text1 = data1.decode('utf-8')
+
+
+url2 = 'https://www.gutenberg.org/cache/epub/66623/pg66623.txt'
+response = urllib.request.urlopen(url2)
+data2 = response.read()
+text2 = data2.decode('utf-8')
+nltk_text2 = data2.decode('utf-8')
 
 strippables = r"(?:s|'s|!+|,|\.|;|:|\(|\)|\"|\?+)?\s"
-text = re.sub(strippables, ' ',text)
-text = text.lower()
+
+text1 = re.sub(strippables, ' ',text1)
+text1 = text1.lower()
+text2 = re.sub(strippables, ' ',text2)
+text2 = text2.lower()
 
 def count_words(book):
     word_count = {}
@@ -65,11 +70,40 @@ def compare_top_x(dict_1,dict_2,x):
             no_dup_list.append(i)
     return no_dup_list
 
+def sentiment_analysis(nltk_text):
+    import nltk
+    nltk.download('vader_lexicon')
+    from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-import nltk
-nltk.download('vader_lexicon')
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
+    sentence = nltk_text
+    score = SentimentIntensityAnalyzer().polarity_scores(sentence)
+    return score
 
-sentence = nltk_text
-score = SentimentIntensityAnalyzer().polarity_scores(sentence)
-print(score)
+def compare_sentiment(nltk_text1, nltk_text2):
+    d1 = sentiment_analysis(nltk_text1)
+    d2 = sentiment_analysis(nltk_text2)
+    d3 = {}
+    for key in d1:
+        d3[key] = d1[key] - d2[key]
+    return d3
+
+def main():
+    book = text1
+    print(count_words(book))
+    
+    dic = count_words(book)
+    print(ranked_words(dic))
+    
+    x = 10
+    print(top_x_words(dic,x))
+    
+    dict_1 = count_words(text1)
+    dict_2 = count_words(text2)
+    print(compare_top_x(dict_1,dict_2,x))
+
+    print(sentiment_analysis(nltk_text1))
+    print(sentiment_analysis(nltk_text2))
+
+    print(compare_sentiment(nltk_text1, nltk_text2))
+if __name__ == "__main__":
+    main()
